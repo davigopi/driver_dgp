@@ -1,12 +1,12 @@
-TUTORIAL: CRIAR E CENTRALIZAR A BIBLIOTECA E COMANDO CLI (driver_auto_dgp)
+TUTORIAL: CRIAR E CENTRALIZAR A BIBLIOTECA E COMANDO CLI (driver_dgp)
 ===============================================================================
 ---------------------------------------------------------
 ## 1. ESTRUTURA DA PASTA DO PROJETO LOCAL
 ---------------------------------------------------------
-Crie uma pasta com o nome driver_auto_dgp e coloque os dois arquivos dentro dela:
+Crie uma pasta com o nome driver_dgp e coloque os dois arquivos dentro dela:
 ```
-driver_auto_dgp/
-    ├── driver_auto_dgp.py      <-- O seu código da ferramenta Git
+driver_dgp/
+    ├── driver_dgp.py      <-- O seu código da ferramenta Git
     ├── pyproject.toml      <-- Arquivo de configuração da biblioteca Python
     ├── README.md
     ├── LICENSE (Opcional)
@@ -18,43 +18,43 @@ driver_auto_dgp/
 ---------------------------------------------------------
 ## 2. PUBLICAR NO GITHUB
 ---------------------------------------------------------
-Repositório público ou privado no GitHub com o nome driver_auto_dgp.
+Repositório público ou privado no GitHub com o nome driver_dgp.
 
-URL do repositório: https://github.com/davigopi/driver_auto_dgp
+URL do repositório: https://github.com/davigopi/driver_dgp
 
 
 ---------------------------------------------------------
 ## 3. INSTALAR E ATUALIZAÇÕS
 ---------------------------------------------------------
 
-Abra o terminal do seu computador, ative o ambiente virtual e, no diretório do repositório driver_auto_dgp, execute
+Abra o terminal do seu computador, ative o ambiente virtual e, no diretório do repositório driver_dgp, execute
 
 ---------------------------------------------------------
 ## 4. INSTALAR A FERRAMENTA NO COMPUTADOR
 ---------------------------------------------------------
 ```bash
-pip install git+https://github.com/davigopi/driver_auto_dgp.git
+pip install git+https://github.com/davigopi/driver_dgp.git
 ```
 ---------------------------------------------------------
 ## 5. ATUALIZAR A FERRAMENTA NO FUTURO
 ---------------------------------------------------------
 Alterado a version em pyproject.toml:
 ```bash
-pip install --upgrade git+https://github.com/davigopi/driver_auto_dgp.git
+pip install --upgrade git+https://github.com/davigopi/driver_dgp.git
 ```
 Força a atualização:
 ```bash
-pip install --force-reinstall git+https://github.com/davigopi/driver_auto_dgp.git
+pip install --force-reinstall git+https://github.com/davigopi/driver_dgp.git
 ```
 ```bash
-pip install --upgrade --no-cache-dir git+https://github.com/davigopi/driver_auto_dgp.git
+pip install --upgrade --no-cache-dir git+https://github.com/davigopi/driver_dgp.git
 ```
 
 ---------------------------------------------------------
 ## 6. INSTALAR REQUIREMENTS
 ---------------------------------------------------------
 ```bash
-pip install -r venv\Lib\site-packages\driver_auto_dgp\requirements.txt
+pip install -r venv\Lib\site-packages\driver_dgp\requirements.txt
 ```
 ---------------------------------------------------------
 ## 7. COMO USAR NOS SEUS PROJETOS
@@ -62,14 +62,14 @@ pip install -r venv\Lib\site-packages\driver_auto_dgp\requirements.txt
 - Via terminal (em qualquer pasta de projeto React Native, Python, etc.):
   Basta abrir o terminal na pasta desejada e digitar:
 ```bash
-python -m driver_auto_dgp
+python -m driver_dgp
 ```
 - Via importação dentro de scripts Python futuros:
 ```python
-from driver_auto_dgp import Driver_Auto_Dgp
+from driver_dgp import Driver_Dgp
 ```
 ```python
-import driver_auto_dgp
+import driver_dgp
 ```
 
 ---------------------------------------------------------
@@ -80,10 +80,10 @@ import driver_auto_dgp
 
 ```python
 import time
-from driver_auto_dgp import Driver_Auto_Dgp
+from driver_dgp import Driver_Dgp
 
 # Instancia a classe
-driver_auto = Driver_Auto_Dgp()
+driver_auto = Driver_Dgp()
 
 # Define o site
 info = {'site': 'https://www.google.com'}
@@ -99,9 +99,9 @@ driver_auto.close_driver(driver)
 ```
 ### B) Abrindo em Outros Navegadores
 ```python
-from driver_auto_dgp import Driver_Auto_Dgp
+from driver_dgp import Driver_Dgp
 
-driver_auto = Driver_Auto_Dgp()
+driver_auto = Driver_Dgp()
 info = {'site': 'https://www.google.com'}
 
 # Edge
@@ -119,9 +119,9 @@ driver_auto.close_driver(driver_brave)
 ```
 ### C) Utilizando Outras Funções da Classe
 ```python
-from driver_auto_dgp import Driver_Auto_Dgp
+from driver_dgp import Driver_Dgp
 
-driver_auto = Driver_Auto_Dgp()
+driver_auto = Driver_Dgp()
 driver = driver_auto.open_site({'site': 'https://www.google.com'}, navegador='chrome')
 
 # Ajustar zoom da página
