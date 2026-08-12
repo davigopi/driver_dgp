@@ -1,0 +1,10 @@
+# Informa à IDE que este é o arquivo principal de configuração
+root = true
+
+# Aplica as regras abaixo para todos os arquivos
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true

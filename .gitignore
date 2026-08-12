@@ -1,0 +1,39 @@
+# ==========================================
+# REGRAS DE PYTHON
+# ==========================================
+.venv/
+venv/
+env/
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+build/
+dist/
+senha.txt
+
+# ==========================================
+# REGRAS DE REACT NATIVE / NODE / JAVASCRIPT
+# ==========================================
+node_modules/
+.expo/
+dist/
+web-build/
+.bundle/
+vendor/bundle/
+*.metro-health-check*
+
+# Builds e Nativos (se gerados localmente)
+android/app/build/
+android/.gradle/
+ios/Pods/
+ios/build/
+
+# ==========================================
+# SISTEMA E IDEs
+# ==========================================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
