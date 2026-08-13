@@ -14,6 +14,7 @@ import urllib.request
 import mss
 import pygetwindow as gw
 import signal
+import random
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.edge.service import Service as EdgeService
@@ -21,6 +22,29 @@ from selenium.webdriver.firefox.service import Service as FirefoxService
 
 
 separador = "_________________________________________________________________________________________________________________________________________________________________"
+
+list_navegador = ['chrome', 'edge', 'firefox', 'brave']
+
+list_sites = [
+    "https://www.google.com",
+    "https://www.speedtest.net/pt",
+    "https://www.youtube.com",
+    "https://www.facebook.com",
+    "https://www.instagram.com",
+    "https://www.linkedin.com",
+    "https://www.github.com",
+    "https://www.microsoft.com",
+    "https://www.python.org",
+    "https://stackoverflow.com",
+    "https://www.reddit.com",
+    "https://www.wikipedia.org",
+    "https://www.amazon.com.br",
+    "https://www.mercadolivre.com.br",
+    "https://www.globo.com",
+    "https://www.uol.com.br",
+    "https://www.tecmundo.com.br",
+    "https://www.baixaki.com.br",
+]
 
 dict_url_download_google = {
     'base': "https://storage.googleapis.com/chrome-for-testing-public/",
@@ -65,28 +89,60 @@ def clean_path_driver():
     os.makedirs(extract_path, exist_ok=True)
 
 # ============================================================
-# Mata processos travados
+# Fechar navagadores
 # ============================================================
-def close_driver(driver=None, navegador=None):
+def close_driver(driver=None, navegador=None, historico=False):
     try:
         if driver:
             driver.quit()
-            print(f'\n⚓  Fechando do driver ✅', end=' ', flush=True)
+            print(f'\n⚓ Fechar driver ✅', end=' | ', flush=True)
+            return True
+        elif navegador and historico:
+            user_home = os.path.expanduser("~")
+            user_data_dir = os.path.normpath(
+                os.path.join(user_home, "AppData", f"historico_{navegador}")
+            )
+            text_pid = ''
+            for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+                try:
+                    navegador_exe = navegador+'.exe'
+                    if proc.info['name'] and proc.info['name'].lower() == navegador_exe.lower():
+                        cmd = proc.info['cmdline']
+                        if cmd and any(f'--user-data-dir={user_data_dir}' in arg for arg in cmd):
+                            text_pid += f'{proc.pid}, '
+                            proc.kill()
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    pass
+            if text_pid:
+                print(f'\n⚓ Fechar navegador {navegador} PID {text_pid}', end=' | ', flush=True)
+                return True
         elif navegador:
-            subprocess.run(['taskkill', '/f', '/im', navegador], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            print(f'\n⚓  Fechando do navegador {navegador} ✅', end=' ', flush=True)
+            navegador = navegador.lower()
+            if 'edge' in navegador:
+                list_navegador_exe = ["msedgedriver.exe", "msedge.exe"]
+            elif 'firefox' in navegador:
+                list_navegador_exe = ["firefox.exe"]
+            elif 'brave' in navegador:
+                list_navegador_exe = ["brave.exe"]
+            else:
+                list_navegador_exe = ["chromedriver.exe", "chrome.exe"]
         else:
-            for navegador in ["chromedriver.exe", "chrome.exe", "msedgedriver.exe", "msedge.exe"]:
-                subprocess.run(['taskkill', '/f', '/im', navegador], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                print(f'\n⚓  Fechando do navegador {navegador} ✅', end=' ', flush=True)
-    except:
-        print(f'\n⚓  Fechando do driver ⛔', end=' ', flush=True)
-
+            list_navegador_exe = ["chromedriver.exe", "chrome.exe", "msedgedriver.exe", "msedge.exe"]
+        for navegador_exe in list_navegador_exe:
+            subprocess.run(['taskkill', '/f', '/im', navegador_exe], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            print(f'\n⚓ Fechar navegador {navegador_exe} ✅', end=' | ', flush=True)
+        return True
+    except Exception as e:
+        print(f'\n⚓ Fechar driver ou navegador. Exception: {e} ⛔', end=' | ', flush=True)
+        return False
 
 # ============================================================
-# Localizar monitor pela resolução
+# Localizar monitor pelo seu número ou pela resolução
 # ============================================================
-def get_monitor(num=None, width=1360, height=768):
+def get_monitor(num=None, width=None, height=None):
+    if not num and not width and not height:
+        print(f'è preciso informa a numeração(num=) ou largura(width=) e altura(height=) da tela')
+        return False
     with mss.mss() as sct:
         monitores = sct.monitors[1:]  # Ignora sct.monitors[0] (área unificada)
         if not monitores:
@@ -110,7 +166,6 @@ class Driver_Auto_Dgp:
         self.driver = None
         self.path_driver = ''
         self.version = ''
-        self.text_print = ''
 
     # ============================================================
     #   UTILIDADES
@@ -126,8 +181,12 @@ class Driver_Auto_Dgp:
             if os.path.exists(p):
                 shutil.rmtree(p, ignore_errors=True)
 
+    # def set_zoom(self, driver, percentage):
+    #     driver.execute_script(f"document.body.style.zoom='{percentage}%'")
     def set_zoom(self, driver, percentage):
-        driver.execute_script(f"document.body.style.zoom='{percentage}%'")
+        # Funciona para Chrome, Edge, Brave e Firefox moderno via CSS transform
+        driver.execute_script(f"document.body.style.transform='scale({percentage / 100})'; document.body.style.transformOrigin='0 0';")
+
 
     def set_background_dark(self, driver, dark_mode=True):
         if dark_mode:
@@ -138,9 +197,6 @@ class Driver_Auto_Dgp:
             # Restaura para o padrão (ou limpa os estilos diretos)
             driver.execute_script("document.body.style.backgroundColor = '';")
             driver.execute_script("document.body.style.color = '';")
-
-
-
 
     def refresh_driver(self, driver):
         if driver:
@@ -163,26 +219,6 @@ class Driver_Auto_Dgp:
         )
 
     # ============================================================
-    #   FECHAR O DRIVER SE ERROS
-    # ============================================================
-    def close_browser_specify(self, process_name):
-        user_home = os.path.expanduser("~")
-        user_data_dir = os.path.join(user_home, "AppData", "navegador_historico")
-        self.text_print += (f'Fechando {process_name} PID ')
-        text_pid = ''
-        for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
-            try:
-                if proc.info['name'] and proc.info['name'].lower() == process_name.lower():
-                    cmd = proc.info['cmdline']
-                    if cmd and any(f'--user-data-dir={user_data_dir}' in arg for arg in cmd):
-                        text_pid += f'{proc.pid}, '
-                        proc.kill()
-            except (psutil.NoSuchProcess, psutil.AccessDenied):
-                pass
-        if text_pid:
-            print(f'{self.text_print} {text_pid}', end=' | ')
-
-    # ============================================================
     #   INSTALAÇÃO DOS NAVEGADORES FOR TESTING (SILENCIOSA)
     # ============================================================
     def install_new_navegadores(self, navegador, e):
@@ -200,8 +236,14 @@ class Driver_Auto_Dgp:
         # mover arquivos
         src = os.path.join(install_path, 'chrome-win64')
         for file in os.listdir(src):
-            shutil.move(os.path.join(src, file), os.path.join(install_path, file))
-        shutil.rmtree(src)
+            # shutil.move(os.path.join(src, file), os.path.join(install_path, file))
+            for root, _, files in os.walk(extract_path):
+                if 'chromedriver.exe' in files:
+                    self.path_driver = os.path.join(root, 'chromedriver.exe')
+                    break
+        # shutil.rmtree(src)
+        time.sleep(0.5)
+        shutil.rmtree(src, ignore_errors=True)
         os.remove(path_chrome_zip)
         print('instalado', end=' ')
 
@@ -263,7 +305,7 @@ class Driver_Auto_Dgp:
                 else:
                     print('❌ BLOQUEADO. Feche tudo e tente novamente.')
                     sys.exit()
-                close_driver()
+                close_driver(navegador=navegador)
         os.remove(path_driver_zip)
         if navegador == 'firefox':
             self.path_driver = os.path.join(extract_path,'geckodriver.exe')
@@ -289,7 +331,9 @@ class Driver_Auto_Dgp:
             return webdriver.Firefox(service=service, options=options)
 
         user_home = os.path.expanduser("~")
-        user_data_dir = os.path.join(user_home, "AppData", f"navegador_historico_{navegador}")
+        user_data_dir = os.path.normpath(
+            os.path.join(user_home, "AppData", f"historico_{navegador}")
+        )
         os.makedirs(user_data_dir, exist_ok=True)
         if navegador == 'edge':
             options = webdriver.EdgeOptions()
@@ -331,80 +375,113 @@ class Driver_Auto_Dgp:
     # ============================================================
     #   ABRIR O DRIVER E RETONA-LO
     # ============================================================
-    def open_site(self, info, navegador='Chrome'):
+    def open_site(self, info):
+        if "site" not in info:
+            print('Não foi informado a chave site dentro da biblioteca info')
+            return False
+        if 'navegador' not in info or info['navegador'] not in list_navegador:
+            info['navegador'] = 'chrome'
+        info['navegador'] = info['navegador'].lower()
+
         os.system('cls')
-        self.text_print = ''
-        print(f'{separador}\n⚓  {navegador} | Site: {info["site"][8:33]}', end=' | ')
-        navegador = navegador.lower()
+        num=1
+        target_monitor = get_monitor(num=num)
+        pos_x = target_monitor["left"]
+        pos_y = target_monitor["top"]
 
-        if navegador == 'brave':
-            self.close_browser_specify("brave.exe")
-            self.get_version(navegador, r'Software\BraveSoftware\Brave-Browser\BLBeacon')
-            driver = self.create_driver(navegador)
-        elif navegador == 'edge':
-            self.close_browser_specify("msedge.exe")
-            self.get_version(navegador, r'Software\Microsoft\Edge\BLBeacon')
-            driver = self.create_driver(navegador)
-        elif navegador == 'firefox':
-            self.close_browser_specify("firefox.exe")
-            self.get_version(navegador, '')
-            driver = self.create_driver(navegador)
+        print(f"{separador}\n⚓ Driver Auto ({info['navegador']}) Site: ({info['site'][8:33]}) "
+              f"Monit número: ({num}). X: {pos_x} Y: {pos_y} ✅ ",
+              end=' ', flush=True)
+
+        close_driver(navegador=info['navegador'], historico=True)
+        if info['navegador'] == 'brave':
+            self.get_version(info['navegador'], r'Software\BraveSoftware\Brave-Browser\BLBeacon')
+        elif info['navegador'] == 'edge':
+            self.get_version(info['navegador'], r'Software\Microsoft\Edge\BLBeacon')
+        elif info['navegador'] == 'firefox':
+            self.get_version(info['navegador'], '')
         else:
-            self.close_browser_specify("chrome.exe")
-            self.get_version(navegador, r'Software\Google\Chrome\BLBeacon')
-            driver = self.create_driver(navegador)
+            self.get_version(info['navegador'], r'Software\Google\Chrome\BLBeacon')
+        driver = self.create_driver(info['navegador'])
 
-        target_monitor = get_monitor(num=3)
-        driver.set_window_position(target_monitor["left"], target_monitor["top"])
+
+        driver.set_window_position(pos_x, pos_y)
         driver.get(info["site"])
         driver.maximize_window()
         print('✔️')
         return driver
 
 
-
-
-
-
-
-
-
-
-
 class Driver_Manual_Dgp:
-    def open_site_pre_open(self, info_ea):
-        chrome_path = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
-        user_home = os.path.expanduser("~")
-        user_data_dir = os.path.join(user_home, "Documents", "jg_historico")
+    def open_site(self, info):
+        if "site" not in info:
+            print('Não foi informado a chave site dentro da biblioteca info')
+            return False
+        if 'navegador' not in info:
+            info['navegador'] = 'chrome'
+        info['navegador'] = info['navegador'].lower()
 
-        if not os.path.exists(user_data_dir):
-            os.makedirs(user_data_dir)
-
-        target_monitor = get_monitor(width=1360, height=768)
-
+        os.system('cls')
+        width=1360
+        height=768
+        target_monitor = get_monitor(width=width, height=height)
         # Posiciona no canto do monitor alvo
         pos_x = target_monitor["left"]
         pos_y = target_monitor["top"]
+        print(f"{separador}\n⚓ Driver Manual ({info['navegador']}) Site: ({info['site'][8:33]}) "
+              f"Monit largura: ({width}) altura: ({height}). X: {pos_x} Y: {pos_y} ✅ ",
+              end=' ', flush=True)
+        user_home = os.path.expanduser("~")
+        user_data_dir = os.path.normpath(
+            os.path.join(user_home, "AppData", f"historico_{info['navegador']}")
+        )
+        if not os.path.exists(user_data_dir):
+            os.makedirs(user_data_dir)
+        list_path_navegador_exe = {
+            'firefox': r"C:\Program Files\Mozilla Firefox\firefox.exe",
+            'edge': r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+            'brave': r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe",
+            'chrome': r"C:\Program Files\Google\Chrome\Application\chrome.exe"
+        }
+        titulos_navegador = {
+            'chrome': ["chrome", "google"],
+            'edge': ["edge", "microsoft edge"],
+            'firefox': ["firefox", "mozilla"],
+            'brave': ["brave"]
+        }
+        navegador_path = list_path_navegador_exe.get(info["navegador"], list_path_navegador_exe["chrome"])
 
-        args = [
-            chrome_path,
-            "--remote-debugging-port=9222",
-            f"--user-data-dir={user_data_dir}",
-            f"--window-position={pos_x},{pos_y}",
-            "--no-first-run",
-            info_ea["site"],
-        ]
+        if not os.path.isfile(navegador_path):
+            print(f"A pasta/executável {navegador_path} não foi encontrado.")
+            return False
 
-        # 1. Abre o processo do Chrome
+        if info['navegador'] == 'firefox':
+            args = [navegador_path, info['site']]
+        else:
+            args = [
+                navegador_path,
+                # "--remote-debugging-port=9222",
+                f"--user-data-dir={user_data_dir}",
+                f"--window-position={pos_x},{pos_y}",
+                "--no-first-run",
+                "--no-default-browser-check",
+                "--new-window",
+                info["site"],
+            ]
         subprocess.Popen(args)
 
-        # 2. Aguarda a janela surgir e força o Maximizar pelo Windows
-        time.sleep(1.5)  # Tempo para a janela ser criada
+        alvos = titulos_navegador.get(info['navegador'], [info['navegador']])
+        time.sleep(1.5)
         for window in gw.getAllWindows():
-            if "Chrome" in window.title or "Google" in window.title:
-                window.maximize()
+            title_lower = window.title.lower()
+            if any(alvo in title_lower for alvo in alvos):
+                try:
+                    window.moveTo(pos_x, pos_y)
+                    time.sleep(0.2)
+                    window.maximize()
+                except Exception as e:
+                    print(f"Erro ao posicionar janela: {e}")
                 break
-
 
 # ============================================================
 #   EXEMPLO DE USO
@@ -413,28 +490,28 @@ class Driver_Manual_Dgp:
 if __name__ == '__main__':
     driver_manual_dgp = Driver_Manual_Dgp()
     driver_auto_dgp = Driver_Auto_Dgp()
-
-    print(f'Abrir Driver Manual')
-    info = {"site": 'https://google.com'}
-    driver = driver_manual_dgp.open_site_pre_open(info)
-    time.sleep(3)
-    close_driver(navegador='chrome.exe')
+    print(f'\nAbrir Driver Manual')
+    for n, navegador in enumerate(list_navegador):
+        info = {"site": random.choice(list_sites),'navegador': navegador}
+        time.sleep(1)
+        print(f'Driver Manual {n+1}/{len(list_navegador)} -> {navegador}\n')
+        driver_manual_dgp.open_site(info)
+        time.sleep(3)
+        if navegador == 'firefox':  # o firefox não tem o argumentos de historico --user-data-dir=
+            close_driver(navegador=navegador)
+        else:
+            close_driver(navegador=navegador, historico=True)
     print(f'Fechado Driver Manual')
 
-
-
-
-    print(f'\nAbrir Driver Automatico')
-    info = {'site': 'https://www.speedtest.net/pt'}
-    lista = ['chromes', 'edge', 'firefox', 'brave']
-    num_list = len(lista)
-    for n, navegador in enumerate(lista):
+    print(f'\nAbrir Driver Automático')
+    for n, navegador in enumerate(list_navegador):
+        info = {"site": random.choice(list_sites),'navegador': navegador}
         time.sleep(1)
-        print(f'{n+1}/{num_list} -> {navegador}\n')
-        driver = driver_auto_dgp.open_site(info, navegador)
+        print(f'Driver Automático {n+1}/{len(list_navegador)} -> {navegador}\n')
+        driver = driver_auto_dgp.open_site(info)
         time.sleep(3)
-        if navegador == 'brave':
-            close_driver(navegador='brave.exe')
+        if navegador == 'brave':  # o brave não consegue fechar o driver pelo selenium
+            close_driver(navegador=navegador)
         else:
             close_driver(driver=driver)
-    print(f'Fechado Driver Automatico')
+    print(f'Fechado Driver Automático')
