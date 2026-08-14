@@ -403,12 +403,13 @@ class Driver_Auto_Dgp:
             return False
         if 'navegador' not in info:
             info['navegador'] = 'chrome'
-        if 'num' not in info and'width' not in info and 'height' not in info:
-            info['num'] = 1
-        if info['num'] is None:
-            pos_x, pos_y  = get_monitor(width=info['width'], height=info['height'])
+        if 'num' in info:
+            pos_x, pos_y = get_monitor(num=info['num'])
         else:
-            pos_x, pos_y  = get_monitor(num=info['num'])
+            if 'width' in info and 'height' in info:
+                pos_x, pos_y = get_monitor(width=info['width'], height=info['height'])
+            else:
+                pos_x, pos_y = get_monitor(num=1)
         info['navegador'] = info['navegador'].lower()
         os.system('cls')
         print(f"{separador}\n⚓ Driver Auto ({info['navegador']}) Site: ({info['site'][8:33]}) "
@@ -431,12 +432,13 @@ class Driver_Manual_Dgp:
             return False
         if 'navegador' not in info:
             info['navegador'] = 'chrome'
-        if 'num' not in info and'width' not in info and 'height' not in info:
-            info['num'] = 1
-        if info['num'] is None:
-            pos_x, pos_y  = get_monitor(width=info['width'], height=info['height'])
+        if 'num' in info:
+            pos_x, pos_y = get_monitor(num=info['num'])
         else:
-            pos_x, pos_y  = get_monitor(num=info['num'])
+            if 'width' in info and 'height' in info:
+                pos_x, pos_y = get_monitor(width=info['width'], height=info['height'])
+            else:
+                pos_x, pos_y = get_monitor(num=1)
         info['navegador'] = info['navegador'].lower()
         os.system('cls')
         print(f"{separador}\n⚓ Driver Manual ({info['navegador']}) Site: ({info['site'][8:33]}) "
