@@ -6,8 +6,8 @@ TUTORIAL: CRIAR E CENTRALIZAR A BIBLIOTECA E COMANDO CLI (driver_dgp)
 Crie uma pasta com o nome driver_dgp e coloque os dois arquivos dentro dela:
 ```bash
 driver_dgp/
-    ├── driver_dgp.py      <-- O seu código da ferramenta Git
-    ├── pyproject.toml      <-- Arquivo de configuração da biblioteca Python
+    ├── driver_dgp.py
+    ├── pyproject.toml
     ├── README.md
     ├── LICENSE (Opcional)
     ├── .gitignore
