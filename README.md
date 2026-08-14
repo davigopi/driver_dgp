@@ -9,7 +9,7 @@ driver_dgp/
     ├── driver_dgp.py
     ├── pyproject.toml
     ├── README.md
-    ├── LICENSE (Opcional)
+    ├── LICENSE
     ├── .gitignore
     ├── .editorconfig
     ├── requirements-dev.txt
