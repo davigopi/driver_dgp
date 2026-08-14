@@ -4,7 +4,7 @@ TUTORIAL: CRIAR E CENTRALIZAR A BIBLIOTECA E COMANDO CLI (driver_dgp)
 ## 1. ESTRUTURA DA PASTA DO PROJETO LOCAL
 ---------------------------------------------------------
 Crie uma pasta com o nome driver_dgp e coloque os dois arquivos dentro dela:
-```
+```bash
 driver_dgp/
     ├── driver_dgp.py      <-- O seu código da ferramenta Git
     ├── pyproject.toml      <-- Arquivo de configuração da biblioteca Python
@@ -73,65 +73,149 @@ import driver_dgp
 ```
 
 ---------------------------------------------------------
-## 8. EXEMPLOS DE CÓDIGO DE COMO UTILIZAR
+## 8. PARÂMETROS DE CONFIGURAÇÃO (`info`)
 ---------------------------------------------------------
 
-### A) Exemplo Básico
+Ao utilizar os métodos `open_site(info)` das classes `Driver_Auto_Dgp` e `Driver_Manual_Dgp`, as configurações de inicialização devem ser passadas através de um dicionário (`info`).
+
+### Estrutura do Dicionário `info`
+
+| Chave | Tipo | Obrigatório? | Valor Padrão | Descrição |
+| :--- | :--- | :--- | :--- | :--- |
+| `site` | `str` | **Sim** | — | URL completa da página que será aberta (ex: `'https://www.google.com'`). |
+| `navegador` | `str` | Não | `'chrome'` | Navegador a ser utilizado. Opções aceitas: `'chrome'`, `'edge'`, `'firefox'`, `'brave'`. |
+| `num` | `int` / `None` | Não | `1` | Número do monitor onde a janela deve ser aberta (base 1). Se definido como `None`, o sistema tentará identificar o monitor pelas chaves `width` e `height`. |
+| `width` | `int` | Não | `None` | Largura da resolução do monitor de destino (ex: `1920`). Utilizado para identificar a tela quando `num=None`. |
+| `height` | `int` | Não | `None` | Altura da resolução do monitor de destino (ex: `1080`). Utilizado para identificar a tela quando `num=None`. |
+
+---
+
+### Exemplo Completo de Declaração
+
+```python
+# Exemplo 1: Configuração básica (Abre no Chrome, Monitor 1)
+info_basico = {
+    'site': '[https://www.google.com](https://www.google.com)'
+}
+
+# Exemplo 2: Definindo navegador e monitor por número
+info_monitor_num = {
+    'site': '[https://www.google.com](https://www.google.com)',
+    'navegador': 'edge',
+    'num': 2  # Abre no segundo monitor
+}
+
+# Exemplo 3: Definindo monitor por resolução
+info_monitor_res = {
+    'site': '[https://www.google.com](https://www.google.com)',
+    'navegador': 'firefox',
+    'num': None,
+    'width': 1360,
+    'height': 768
+}
+```
+---------------------------------------------------------
+## 9. EXEMPLOS DE CÓDIGO DE COMO UTILIZAR
+---------------------------------------------------------
+
+### A) Modo Automático (Selenium Driver)
+Utilize a classe `Driver_Auto_Dgp` para instanciar um driver do Selenium totalmente automatizado com gerenciamento automático de perfil e versão.
 
 ```python
 import time
-from driver_dgp import Driver_Dgp
+from driver_dgp import Driver_Auto_Dgp, close_driver
 
 # Instancia a classe
-driver_auto = Driver_Dgp()
+driver_auto = Driver_Auto_Dgp()
 
-# Define o site
-info = {'site': 'https://www.google.com'}
+# Configura as informações de acesso
+info = {
+    'site': '[https://www.google.com](https://www.google.com)',
+    'navegador': 'chrome', # Opções: 'chrome', 'edge', 'firefox', 'brave'
+    'num': 1               # Número do monitor onde a janela será posicionada
+}
 
-# Abre o site no navegador desejado ('chrome', 'edge', 'firefox', 'brave')
-driver = driver_auto.open_site(info, navegador='chrome')
+# Abre o site e retorna a instância do Selenium WebDriver
+driver = driver_auto.open_site(info)
 
 # Sua automação Selenium aqui...
 time.sleep(3)
 
-# Fecha o driver com segurança
-driver_auto.close_driver(driver)
+# Fecha o driver com segurança (para o Brave, utilize close_driver(navegador='brave'))
+close_driver(driver=driver)
 ```
-### B) Abrindo em Outros Navegadores
-```python
-from driver_dgp import Driver_Dgp
+### B) Modo Manual (Abertura Direta do Navegador)
+Utilize a classe Driver_Manual_Dgp para abrir o navegador via processo do sistema, mantendo perfil persistente e posicionamento de tela, sem vincular uma sessão Selenium.
 
-driver_auto = Driver_Dgp()
-info = {'site': 'https://www.google.com'}
+```Python
+import time
+from driver_dgp import Driver_Manual_Dgp, close_driver
 
-# Edge
-driver_edge = driver_auto.open_site(info, navegador='edge')
-driver_auto.close_driver(driver_edge)
+driver_manual = Driver_Manual_Dgp()
 
-# Firefox
-driver_firefox = driver_auto.open_site(info, navegador='firefox')
-driver_auto.close_driver(driver_firefox)
+# Exemplo definindo o monitor pela resolução
+info = {
+    'site': '[https://www.google.com](https://www.google.com)',
+    'navegador': 'edge',
+    'num': None,          # Define como None para buscar pela resolução
+    'width': 1920,
+    'height': 1080
+}
 
-# Brave
-driver_brave = driver_auto.open_site(info, navegador='brave')
-driver_auto.close_driver(driver_brave)
+# Abre o navegador diretamente no SO
+driver_manual.open_site(info)
 
+time.sleep(5)
+
+# Fecha o navegador pelo nome da aplicação
+close_driver(navegador='edge')
 ```
-### C) Utilizando Outras Funções da Classe
-```python
-from driver_dgp import Driver_Dgp
+### C) Abrindo em Outros Navegadores
+A estrutura flexível do dicionário info permite alternar entre os navegadores suportados com facilidade.
 
-driver_auto = Driver_Dgp()
-driver = driver_auto.open_site({'site': 'https://www.google.com'}, navegador='chrome')
+```Python
+import time
+from driver_dgp import Driver_Auto_Dgp, close_driver
 
-# Ajustar zoom da página
-driver_auto.set_zoom(driver, percentual=80)
+driver_auto = Driver_Auto_Dgp()
 
-# Ativar modo escuro
+for nav in ['chrome', 'edge', 'firefox', 'brave']:
+    info = {
+        'site': '[https://www.google.com](https://www.google.com)',
+        'navegador': nav
+    }
+
+    driver = driver_auto.open_site(info)
+    time.sleep(2)
+
+    # Tratamento para fechar o Brave ou o driver padrão
+    if nav == 'brave':
+        close_driver(navegador='brave')
+    else:
+        close_driver(driver=driver)
+```
+### D) Utilizando Funções Utilitárias e de Tela
+Você pode manipular a visualização da página e o estado do navegador através dos métodos integrados.
+
+```Python
+from driver_dgp import Driver_Auto_Dgp, close_driver
+
+driver_auto = Driver_Auto_Dgp()
+
+info = {'site': '[https://www.google.com](https://www.google.com)', 'navegador': 'chrome'}
+driver = driver_auto.open_site(info)
+
+# Ajustar zoom da página (ex: 80%)
+driver_auto.set_zoom(driver, percentage=80)
+
+# Ativar modo escuro via JavaScript
 driver_auto.set_background_dark(driver, dark_mode=True)
 
 # Atualizar a página
 driver_auto.refresh_driver(driver)
 
-driver_auto.close_driver(driver)
+# Encerrar
+close_driver(driver=driver)
 ```
+
+<FollowUp label="Quer que eu ajude a documentar também as opções aceitas no dicionário 'info' no README?" query="Adicione uma tabela explicativa no README detalhando as chaves aceitas pelo dicionário 'info' (como site, navegador, num, width, height)."/>
