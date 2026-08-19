@@ -44,25 +44,25 @@ list_sites = [
     "https://www.baixaki.com.br"
 ]
 
-dict_path_navegador_exe = {
+dict_path_navegation_exe = {
     'chrome': r"C:\Program Files\Google\Chrome\Application\chrome.exe",
     'edge': r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
     'firefox': r"C:\Program Files\Mozilla Firefox\firefox.exe",
     'brave': r"C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"
 }
-dict_titulos_navegador = {
+dict_titulos_navegation = {
     'chrome': ["chrome", "google"],
     'edge': ["edge", "microsoft edge"],
     'firefox': ["firefox", "mozilla"],
     'brave': ["brave"]
 }
-dict_navegador_exe = {
+dict_navegation_exe = {
     'chrome': ["chromedriver.exe", "chrome.exe"],
     'edge': ["msedgedriver.exe", "msedge.exe"],
     'firefox': ["firefox.exe", 'geckodriver.exe'],
     'brave': ["brave.exe"]
 }
-dict_registro_navegador = {
+dict_registro_navegation = {
     'chrome': r'Software\Google\Chrome\BLBeacon',
     'edge': r'Software\Microsoft\Edge\BLBeacon',
     'firefox': '',
@@ -91,15 +91,15 @@ brave_port = "9222"
 last_vers_chrome = "https://googlechromelabs.github.io/chrome-for-testing/latest-patch-versions-per-build.json"
 
 user_home = os.path.expanduser("~")
-user_data_dir = os.path.join(user_home, "AppData", "historico_navegador_dgp")
+user_data_dir = os.path.join(user_home, "AppData", "historico_navegation_dgp")
 user_data_path = os.path.normpath(user_data_dir)
 
 
 # ============================================================
 # Baixa o ZIP
 # ============================================================
-def download_driver_zip(version, navegador='chrome'):
-    if navegador == 'firefox':
+def download_driver_zip(version, navegation='chrome'):
+    if navegation == 'firefox':
         resp = requests.get(gecko_url)
         resp.raise_for_status()
         version = resp.json()["tag_name"]
@@ -119,21 +119,21 @@ def clean_path_driver():
 # ============================================================
 # Fechar navagadores
 # ============================================================
-def close_driver(driver=None, navegador=None, historico=False):
+def close_driver(driver=None, navegation=None, historico=False):
     try:
-        list_navegador_exe = []
-        if navegador:
-            navegador = navegador.lower()
-            navegador_exe = navegador+'.exe'
+        list_navegation_exe = []
+        if navegation:
+            navegation = navegation.lower()
+            navegation_exe = navegation+'.exe'
         if driver:
             driver.quit()
             print(f'\n⚓ Fechar driver ✅', end=' | ', flush=True)
             return True
-        elif navegador and historico and navegador in dict_navegador_exe:
+        elif navegation and historico and navegation in dict_navegation_exe:
             text_pid = ''
             for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
                 try:
-                    if proc.info['name'] and proc.info['name'].lower() == navegador_exe:
+                    if proc.info['name'] and proc.info['name'].lower() == navegation_exe:
                         cmd = proc.info['cmdline']
                         if cmd:
                             cmd_line_str = " ".join(cmd).lower().replace('/', '\\')
@@ -159,19 +159,19 @@ def close_driver(driver=None, navegador=None, historico=False):
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
                     pass
             if text_pid:
-                print(f'\n⚓ Fechar navegador {navegador} PID {text_pid}', end=' | ', flush=True)
+                print(f'\n⚓ Fechar navegation {navegation} PID {text_pid}', end=' | ', flush=True)
                 return True
-        elif navegador and navegador in dict_navegador_exe:
-            list_navegador_exe = dict_navegador_exe[navegador]
+        elif navegation and navegation in dict_navegation_exe:
+            list_navegation_exe = dict_navegation_exe[navegation]
         else:
-            for value in dict_navegador_exe.values():
-                list_navegador_exe.extend(value)
-        for navegador_exe in list_navegador_exe:
-            subprocess.run(['taskkill', '/f', '/im', navegador_exe], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            print(f'\n⚓ Fechar navegador {navegador_exe} ✅', end=' | ', flush=True)
+            for value in dict_navegation_exe.values():
+                list_navegation_exe.extend(value)
+        for navegation_exe in list_navegation_exe:
+            subprocess.run(['taskkill', '/f', '/im', navegation_exe], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            print(f'\n⚓ Fechar navegation {navegation_exe} ✅', end=' | ', flush=True)
         return True
     except Exception as e:
-        print(f'\n⚓ Fechar driver ou navegador. Exception: {e} ⛔', end=' | ', flush=True)
+        print(f'\n⚓ Fechar driver ou navegation. Exception: {e} ⛔', end=' | ', flush=True)
         return False
 
 # ============================================================
@@ -271,7 +271,7 @@ class Driver_Auto_Dgp:
 
     def open_brave_debug(self):
         comando = [
-            dict_path_navegador_exe['brave'],
+            dict_path_navegation_exe['brave'],
             f"--remote-debugging-port={brave_port}",
             f"--user-data-dir={user_data_path}",
             "--profile-directory=Default"
@@ -283,11 +283,11 @@ class Driver_Auto_Dgp:
         )
 
     # ============================================================
-    #   INSTALAÇÃO DOS NAVEGADORES FOR TESTING (SILENCIOSA)
+    #   INSTALAÇÃO DOS navegationES FOR TESTING (SILENCIOSA)
     # ============================================================
-    def install_new_navegadores(self, navegador, e):
-        if navegador in ['edge', 'firefox', 'brave']:
-            print(f'❌ Não instalado. Precisar instalar o navegador {navegador} manualmente. A Exceção: {e}')
+    def install_new_navegationes(self, navegation, e):
+        if navegation in ['edge', 'firefox', 'brave']:
+            print(f'❌ Não instalado. Precisar instalar o navegation {navegation} manualmente. A Exceção: {e}')
             sys.exit()
         self.version = if_not_exist_version_chrome
         print(f'❌ Não instalado. Nova versão {self.version} instalando...', end=' ')
@@ -314,19 +314,19 @@ class Driver_Auto_Dgp:
     # ============================================================
     #   LÊ A VERSÃO DO DRIVER INSTALADO
     # ============================================================
-    def get_version(self, navegador, path=dict_registro_navegador['chrome']):
-        if navegador in self.versions:
-            return self.versions[navegador]
+    def get_version(self, navegation, path=dict_registro_navegation['chrome']):
+        if navegation in self.versions:
+            return self.versions[navegation]
         try:
-            if navegador == 'firefox':
-                path = dict_path_navegador_exe[navegador]
+            if navegation == 'firefox':
+                path = dict_path_navegation_exe[navegation]
                 out = subprocess.check_output([path, "--version"], text=True)
                 partes = out.strip().split()
                 ver = partes[-1] if partes else "Desconhecida"
-            elif navegador == 'edge':
+            elif navegation == 'edge':
                 ver = "Selenium Manager"
-            elif navegador == 'brave':
-                path = dict_path_navegador_exe[navegador]
+            elif navegation == 'brave':
+                path = dict_path_navegation_exe[navegation]
                 out = subprocess.check_output([path, "--version"], text=True)
                 partes = out.strip().split()
                 ver = partes[-1] if partes else "Desconhecida"
@@ -339,20 +339,20 @@ class Driver_Auto_Dgp:
                     dados = json.load(response)
                 ver = dados["builds"][build]["version"]
                 print(f"Chrome instalado : {chrome_version} | ChromeDriver usado: {ver}", end=' | ')
-            self.versions[navegador] = ver
+            self.versions[navegation] = ver
             self.version = ver
             return ver
         except Exception as e :
-            self.install_new_navegadores(navegador, e)
+            self.install_new_navegationes(navegation, e)
 
     # ============================================================
     #   INSTALA O DRIVER COMPATÍVEL
     # ============================================================
-    def install_driver(self, navegador):
-        if navegador in ['edge', 'brave']:
+    def install_driver(self, navegation):
+        if navegation in ['edge', 'brave']:
             self.path_driver = None
             return
-        if navegador == 'firefox':
+        if navegation == 'firefox':
             expected_path = os.path.join(extract_path,'geckodriver.exe')
         else:
             expected_path = os.path.join(extract_path, 'chromedriver-win64', 'chromedriver.exe')
@@ -360,7 +360,7 @@ class Driver_Auto_Dgp:
             self.path_driver = expected_path
             return
         print(f'instalando...', end=' ')
-        download_driver_zip(self.version, navegador)
+        download_driver_zip(self.version, navegation)
         for i in range(2):
             clean_path_driver()
             try:
@@ -374,7 +374,7 @@ class Driver_Auto_Dgp:
                 else:
                     print('❌ BLOQUEADO. Feche tudo e tente novamente.')
                     sys.exit()
-                close_driver(navegador=navegador)
+                close_driver(navegation=navegation)
         if os.path.exists(path_driver_zip):
             os.remove(path_driver_zip)
         self.path_driver = expected_path
@@ -384,29 +384,29 @@ class Driver_Auto_Dgp:
     # ============================================================
     #   CRIA O DRIVER SEM ERROS (E COM PERSISTÊNCIA COMPLETA)
     # ============================================================
-    def create_driver(self, navegador):
-        print(f'Versão: {self.version}, abrindo {navegador}...', end=' ')
-        if navegador == 'brave':
+    def create_driver(self, navegation):
+        print(f'Versão: {self.version}, abrindo {navegation}...', end=' ')
+        if navegation == 'brave':
             self.open_brave_debug()
             options = webdriver.ChromeOptions()
             options.add_experimental_option("debuggerAddress", f"127.0.0.1:{brave_port}")
             return webdriver.Chrome(options=options)
-        if navegador == 'firefox':
+        if navegation == 'firefox':
             options = webdriver.FirefoxOptions()
             options.set_preference("dom.webnotifications.enabled", False)
             options.set_preference("signon.rememberSignons", True)
             service = FirefoxService(self.path_driver)
             return webdriver.Firefox(service=service, options=options)
-        self.install_driver(navegador)
+        self.install_driver(navegation)
         os.makedirs(user_data_path, exist_ok=True)
-        if navegador == 'edge':
+        if navegation == 'edge':
             options = webdriver.EdgeOptions()
         else:
            options = webdriver.ChromeOptions()
         options.add_argument(f"--user-data-dir={user_data_path}")            # Define a pasta para salvar/carregar dados do perfil (cookies, logins, etc.)
         options.add_argument("--profile-directory=Default")                  # Força o uso do perfil "Default" dentro do diretório de dados
         options.add_argument('--no-sandbox')                                 # Desativa o modo sandbox (útil para executar como root ou em containers/servidores)
-        options.add_argument('--log-level=3')                                # Filtra os logs do navegador para exibir apenas erros críticos (FATAL)
+        options.add_argument('--log-level=3')                                # Filtra os logs do navegation para exibir apenas erros críticos (FATAL)
         options.add_argument('--disable-logging')                            # Desabilita a gravação e exibição de logs internos do Chromium/Chrome
         options.add_argument('--disable-dev-shm-usage')                      # Evita crashes ao usar a memória do sistema (/tmp) em vez da memória compartilhada (/dev/shm)
         options.add_argument('--disable-gpu')                                # Desativa a aceleração por hardware via GPU (evita falhas de renderização em alguns sistemas)
@@ -416,7 +416,7 @@ class Driver_Auto_Dgp:
             "profile.password_manager_enabled": True
         }                                                                   # Força o salvamento de senhas via Prefs
         options.add_experimental_option("prefs", prefs)
-        if navegador == 'edge':
+        if navegation == 'edge':
             return webdriver.Edge(options=options)
         service = ChromeService(self.path_driver, log_path=os.devnull)
         return webdriver.Chrome(service=service, options=options)
@@ -426,8 +426,8 @@ class Driver_Auto_Dgp:
     # ============================================================
     def open_site(self, info):
         info = validation_info(info)
-        close_driver(navegador=info['navegation'], historico=True)
-        self.get_version(info['navegation'], dict_registro_navegador[info['navegation']])
+        close_driver(navegation=info['navegation'], historico=True)
+        self.get_version(info['navegation'], dict_registro_navegation[info['navegation']])
         driver = self.create_driver(info['navegation'])
         driver.set_window_position(info['x'], info['y'])
         driver.get(info["site"])
@@ -441,20 +441,20 @@ class Driver_Manual_Dgp:
         info = validation_info(info)
         if not os.path.exists(user_data_path):
             os.makedirs(user_data_path)
-        navegador_path = dict_path_navegador_exe.get(info["navegador"], dict_path_navegador_exe["chrome"])
-        if not os.path.isfile(navegador_path):
-            print(f"A pasta/executável {navegador_path} não foi encontrado.")
+        navegation_path = dict_path_navegation_exe.get(info['navegation'], dict_path_navegation_exe["chrome"])
+        if not os.path.isfile(navegation_path):
+            print(f"A pasta/executável {navegation_path} não foi encontrado.")
             return False
         if info['navegation'] == 'firefox':
             args = [
-                navegador_path,
+                navegation_path,
                 "-profile", user_data_path,
                 "-new-window",
                 info['site']
             ]
         else:
             args = [
-                navegador_path,
+                navegation_path,
                 # "--remote-debugging-port=9222",
                 f"--user-data-dir={user_data_path}",
                 f"--window-position={info['x']},{info['y']}",
@@ -464,7 +464,7 @@ class Driver_Manual_Dgp:
                 info["site"],
             ]
         subprocess.Popen(args)
-        alvos = dict_titulos_navegador.get(info['navegation'], [info['navegation']])
+        alvos = dict_titulos_navegation.get(info['navegation'], [info['navegation']])
         time.sleep(1.5)
         for window in gw.getAllWindows():
             title_lower = window.title.lower()
@@ -484,25 +484,25 @@ if __name__ == '__main__':
     driver_manual_dgp = Driver_Manual_Dgp()
     driver_auto_dgp = Driver_Auto_Dgp()
     print(f'\nAbrir Driver Manual')
-    for n, navegador in enumerate(dict_path_navegador_exe):
-        info = {"site": random.choice(list_sites),'navegation': navegador, 'width':1360, 'height':768, 'num':None}
+    for n, navegation in enumerate(dict_path_navegation_exe):
+        info = {"site": random.choice(list_sites),'navegation': navegation, 'width':1360, 'height':768, 'num':None}
         time.sleep(1)
-        print(f'Driver Manual {n+1}/{len(dict_path_navegador_exe)} -> {navegador}\n')
+        print(f'Driver Manual {n+1}/{len(dict_path_navegation_exe)} -> {navegation}\n')
         driver_manual_dgp.open_site(info)
         time.sleep(3)
-        close_driver(navegador=navegador)
-        # close_driver(navegador=navegador, historico=True)
+        close_driver(navegation=navegation)
+        # close_driver(navegation=navegation, historico=True)
     print(f'Fechado Driver Manual')
 
     print(f'\nAbrir Driver Automático')
-    for n, navegador in enumerate(dict_path_navegador_exe):
-        info = {"site": random.choice(list_sites),'navegation': navegador}
+    for n, navegation in enumerate(dict_path_navegation_exe):
+        info = {"site": random.choice(list_sites),'navegation': navegation}
         time.sleep(1)
-        print(f'Driver Automático {n+1}/{len(dict_path_navegador_exe)} -> {navegador}\n')
+        print(f'Driver Automático {n+1}/{len(dict_path_navegation_exe)} -> {navegation}\n')
         driver = driver_auto_dgp.open_site(info)
         time.sleep(3)
-        if navegador == 'brave':
-            close_driver(navegador=navegador)
+        if navegation == 'brave':
+            close_driver(navegation=navegation)
         else:
             close_driver(driver=driver)
     print(f'Fechado Driver Automático')
