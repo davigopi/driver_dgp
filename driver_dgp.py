@@ -179,8 +179,7 @@ def close_driver(driver=None, navegador=None, historico=False):
 # ============================================================
 def get_monitor(num=None, width=None, height=None):
     if num is None and width is None and height is None:
-        print(f'è preciso informa a numeração(num=) ou largura(width=) e altura(height=) da tela')
-        sys.exit(1)
+        raise Exception(f'É preciso informa a numeração(num=) ou largura(width=) e altura(height=) da tela')
     target_monitor = None
     with mss.mss() as sct:
         monitores = sct.monitors[1:]  # Ignora sct.monitors[0] (área unificada)
@@ -200,9 +199,37 @@ def get_monitor(num=None, width=None, height=None):
                 target_monitor = monitores[1]
             else:
                 target_monitor = monitores[0]
-    pos_x = target_monitor["left"]
-    pos_y = target_monitor["top"]
-    return pos_x, pos_y
+    info['x'] = target_monitor["left"]
+    info['y'] = target_monitor["top"]
+    return info['x'], info['y']
+
+
+# ============================================================
+# Validar as informações recebidas no dicionário info
+# ============================================================
+def validation_info(info):
+    print(info)
+    if "site" not in info:
+        raise Exception("Não foi informado a chave site dentro da biblioteca info")
+    if 'navegation' not in info:
+        info['navegation'] = 'chrome'
+        num_monitor = info['num']
+    if 'num' in info and info['num']:
+        info['x'], info['y'] = get_monitor(num=info['num'])
+    else:
+        if 'width' in info and 'height' in info:
+            info['x'], info['y'] = get_monitor(width=info['width'], height=info['height'])
+            num_monitor = f"{info['width']}x{info['height']}"
+        else:
+            info['x'], info['y'] = get_monitor(num=1)
+            num_monitor = 1
+    info['navegation'] = info['navegation'].lower()
+    os.system('cls')
+    print(f"{separador}\n⚓ Driver Auto ({info['navegation']}) Site: ({info['site'][8:33]}) "
+            f"Monit número: ({num_monitor}). X: {info['x']} Y: {info['y']} ✅ ",
+            end=' ', flush=True)
+    return info
+
 
 class Driver_Auto_Dgp:
     def __init__(self):
@@ -398,27 +425,11 @@ class Driver_Auto_Dgp:
     #   ABRIR O DRIVER E RETONA-LO
     # ============================================================
     def open_site(self, info):
-        if "site" not in info:
-            print('Não foi informado a chave site dentro da biblioteca info')
-            return False
-        if 'navegador' not in info:
-            info['navegador'] = 'chrome'
-        if 'num' in info:
-            pos_x, pos_y = get_monitor(num=info['num'])
-        else:
-            if 'width' in info and 'height' in info:
-                pos_x, pos_y = get_monitor(width=info['width'], height=info['height'])
-            else:
-                pos_x, pos_y = get_monitor(num=1)
-        info['navegador'] = info['navegador'].lower()
-        os.system('cls')
-        print(f"{separador}\n⚓ Driver Auto ({info['navegador']}) Site: ({info['site'][8:33]}) "
-              f"Monit número: ({info['num']}). X: {pos_x} Y: {pos_y} ✅ ",
-              end=' ', flush=True)
-        close_driver(navegador=info['navegador'], historico=True)
-        self.get_version(info['navegador'], dict_registro_navegador[info['navegador']])
-        driver = self.create_driver(info['navegador'])
-        driver.set_window_position(pos_x, pos_y)
+        info = validation_info(info)
+        close_driver(navegador=info['navegation'], historico=True)
+        self.get_version(info['navegation'], dict_registro_navegador[info['navegation']])
+        driver = self.create_driver(info['navegation'])
+        driver.set_window_position(info['x'], info['y'])
         driver.get(info["site"])
         driver.maximize_window()
         print('✔️')
@@ -427,30 +438,14 @@ class Driver_Auto_Dgp:
 
 class Driver_Manual_Dgp:
     def open_site(self, info):
-        if "site" not in info:
-            print('Não foi informado a chave site dentro da biblioteca info')
-            return False
-        if 'navegador' not in info:
-            info['navegador'] = 'chrome'
-        if 'num' in info:
-            pos_x, pos_y = get_monitor(num=info['num'])
-        else:
-            if 'width' in info and 'height' in info:
-                pos_x, pos_y = get_monitor(width=info['width'], height=info['height'])
-            else:
-                pos_x, pos_y = get_monitor(num=1)
-        info['navegador'] = info['navegador'].lower()
-        os.system('cls')
-        print(f"{separador}\n⚓ Driver Manual ({info['navegador']}) Site: ({info['site'][8:33]}) "
-              f"Monit largura: ({info['width']}) altura: ({info['height']}). X: {pos_x} Y: {pos_y} ✅ ",
-              end=' ', flush=True)
+        info = validation_info(info)
         if not os.path.exists(user_data_path):
             os.makedirs(user_data_path)
         navegador_path = dict_path_navegador_exe.get(info["navegador"], dict_path_navegador_exe["chrome"])
         if not os.path.isfile(navegador_path):
             print(f"A pasta/executável {navegador_path} não foi encontrado.")
             return False
-        if info['navegador'] == 'firefox':
+        if info['navegation'] == 'firefox':
             args = [
                 navegador_path,
                 "-profile", user_data_path,
@@ -462,20 +457,20 @@ class Driver_Manual_Dgp:
                 navegador_path,
                 # "--remote-debugging-port=9222",
                 f"--user-data-dir={user_data_path}",
-                f"--window-position={pos_x},{pos_y}",
+                f"--window-position={info['x']},{info['y']}",
                 "--no-first-run",
                 "--no-default-browser-check",
                 "--new-window",
                 info["site"],
             ]
         subprocess.Popen(args)
-        alvos = dict_titulos_navegador.get(info['navegador'], [info['navegador']])
+        alvos = dict_titulos_navegador.get(info['navegation'], [info['navegation']])
         time.sleep(1.5)
         for window in gw.getAllWindows():
             title_lower = window.title.lower()
             if any(alvo in title_lower for alvo in alvos):
                 try:
-                    window.moveTo(pos_x, pos_y)
+                    window.moveTo(info['x'], info['y'])
                     time.sleep(0.2)
                     window.maximize()
                 except Exception as e:
@@ -490,7 +485,7 @@ if __name__ == '__main__':
     driver_auto_dgp = Driver_Auto_Dgp()
     print(f'\nAbrir Driver Manual')
     for n, navegador in enumerate(dict_path_navegador_exe):
-        info = {"site": random.choice(list_sites),'navegador': navegador, 'width':1360, 'height':768, 'num':None}
+        info = {"site": random.choice(list_sites),'navegation': navegador, 'width':1360, 'height':768, 'num':None}
         time.sleep(1)
         print(f'Driver Manual {n+1}/{len(dict_path_navegador_exe)} -> {navegador}\n')
         driver_manual_dgp.open_site(info)
@@ -501,7 +496,7 @@ if __name__ == '__main__':
 
     print(f'\nAbrir Driver Automático')
     for n, navegador in enumerate(dict_path_navegador_exe):
-        info = {"site": random.choice(list_sites),'navegador': navegador}
+        info = {"site": random.choice(list_sites),'navegation': navegador}
         time.sleep(1)
         print(f'Driver Automático {n+1}/{len(dict_path_navegador_exe)} -> {navegador}\n')
         driver = driver_auto_dgp.open_site(info)
