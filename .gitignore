@@ -12,6 +12,8 @@ __pycache__/
 build/
 dist/
 senha.txt
+requirements.txt
+requirements_generator.py
 
 # ==========================================
 # REGRAS DE REACT NATIVE / NODE / JAVASCRIPT

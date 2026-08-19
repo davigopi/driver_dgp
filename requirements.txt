@@ -1,23 +1,6 @@
-﻿attrs==26.1.0
-certifi==2026.7.22
-cffi==2.1.1
-charset-normalizer==3.5.0
-h11==0.16.0
-idna==3.18
+Requests==2.34.2
+git_dgp @ git+https://github.com/davigopi/git_dgp.git@9303c2b0acec9d32626c43eb64653e16e0076588
 mss==10.2.0
-outcome==1.3.0.post0
 psutil==7.2.2
-pycparser==3.0
-PyGetWindow==0.0.9
-PyRect==0.2.0
-PySocks==1.7.1
-requests==2.34.2
+pygetwindow==0.0.9
 selenium==4.47.0
-sniffio==1.3.1
-sortedcontainers==2.4.0
-trio==0.34.0
-trio-websocket==0.12.2
-typing_extensions==4.16.0
-urllib3==2.7.0
-websocket-client==1.9.0
-wsproto==1.3.2

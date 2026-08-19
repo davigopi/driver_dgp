@@ -5,7 +5,14 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "driver_dgp"
 version = "0.1.0"
-dependencies = []
+dependencies = [
+    Requests==2.34.2
+    git_dgp @ git+https://github.com/davigopi/git_dgp.git@9303c2b0acec9d32626c43eb64653e16e0076588
+    mss==10.2.0
+    psutil==7.2.2
+    pygetwindow==0.0.9
+    selenium==4.47.0
+]
 
 [tool.setuptools]
 py-modules = ["driver_dgp"]
