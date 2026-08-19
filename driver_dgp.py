@@ -177,8 +177,8 @@ def close_driver(driver=None, navegation=None, historico=False):
 # ============================================================
 # Localizar monitor pelo seu número ou pela resolução
 # ============================================================
-def get_monitor(num=None, width=None, height=None):
-    if num is None and width is None and height is None:
+def get_monitor(info, num=None, width=None, height=None):
+    if not info or num is None and width is None and height is None:
         raise Exception(f'É preciso informa a numeração(num=) ou largura(width=) e altura(height=) da tela')
     target_monitor = None
     with mss.mss() as sct:
@@ -201,7 +201,7 @@ def get_monitor(num=None, width=None, height=None):
                 target_monitor = monitores[0]
     info['x'] = target_monitor["left"]
     info['y'] = target_monitor["top"]
-    return info['x'], info['y']
+    return info
 
 
 # ============================================================
@@ -214,13 +214,13 @@ def validation_info(info):
         info['navegation'] = 'chrome'
     info['navegation'] = info['navegation'].lower()
     if 'num' in info and info['num']:
-        info['x'], info['y'] = get_monitor(num=info['num'])
+        info = get_monitor(info, num=info['num'])
         num_monitor = info['num']
     elif 'width' in info and 'height' in info and info['width'] and info['height']:
-        info['x'], info['y'] = get_monitor(width=info['width'], height=info['height'])
+        info = get_monitor(info, width=info['width'], height=info['height'])
         num_monitor = f"{info['width']}x{info['height']}"
     else:
-        info['x'], info['y'] = get_monitor(num=1)
+        info = get_monitor(info, num=1)
         num_monitor = 1
 
     os.system('cls')
