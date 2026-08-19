@@ -208,22 +208,21 @@ def get_monitor(num=None, width=None, height=None):
 # Validar as informações recebidas no dicionário info
 # ============================================================
 def validation_info(info):
-    print(info)
     if "site" not in info:
         raise Exception("Não foi informado a chave site dentro da biblioteca info")
-    if 'navegation' not in info:
+    if 'navegation' not in info or info['navegation'].lower() not in ['chrome', 'edge', 'firefox', 'brave']:
         info['navegation'] = 'chrome'
-        num_monitor = info['num']
+    info['navegation'] = info['navegation'].lower()
     if 'num' in info and info['num']:
         info['x'], info['y'] = get_monitor(num=info['num'])
+        num_monitor = info['num']
+    elif 'width' in info and 'height' in info and info['width'] and info['height']:
+        info['x'], info['y'] = get_monitor(width=info['width'], height=info['height'])
+        num_monitor = f"{info['width']}x{info['height']}"
     else:
-        if 'width' in info and 'height' in info:
-            info['x'], info['y'] = get_monitor(width=info['width'], height=info['height'])
-            num_monitor = f"{info['width']}x{info['height']}"
-        else:
-            info['x'], info['y'] = get_monitor(num=1)
-            num_monitor = 1
-    info['navegation'] = info['navegation'].lower()
+        info['x'], info['y'] = get_monitor(num=1)
+        num_monitor = 1
+
     os.system('cls')
     print(f"{separador}\n⚓ Driver Auto ({info['navegation']}) Site: ({info['site'][8:33]}) "
             f"Monit número: ({num_monitor}). X: {info['x']} Y: {info['y']} ✅ ",
